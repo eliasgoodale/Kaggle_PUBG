@@ -43,15 +43,16 @@ feature_cols = [ 'assists', 'boosts', 'damageDealt', 'DBNOs',
        'numGroups', 'rankPoints', 'revives', 'rideDistance', 'roadKills',
        'swimDistance', 'teamKills', 'vehicleDestroys', 'walkDistance',
        'weaponsAcquired', 'winPoints']
+
 drop_cols = ['Id', 'groupId', 'matchId', 'matchType']
 
 
-SAVE_DIR = 'models/'
+SAVE_DIR = 'models/keras'
 tensorboard = TrainValTensorBoard(log_dir=SAVE_DIR)
 
-train= pd.read_csv('../data/train.csv', nrows=10000)
+train= pd.read_csv('../data/train.csv', nrows=200000)
 
-train_X, valid_X, train_y, valid_y = load_data(train, 'winPlacePerc', ['Id', 'groupId', 'matchId', 'matchType'])
+train_X, valid_X, train_y, valid_y = load_data(train, 'winPlacePerc', drop_cols)
 
 tanh_scalar = MinMaxScaler(feature_range=(-1, 1))
 train_X = scale_features(train_X, feature_cols, tanh_scalar)
@@ -60,14 +61,14 @@ valid_X = scale_features(valid_X, feature_cols, tanh_scalar)
 
 
 inputs = Input(shape=(24,))
-h = Dense(30, activation='sigmoid')(inputs)
+h = Dense(12, activation='sigmoid')(inputs)
 
 h = BatchNormalization()(h)
 h = Dropout(0.175)(h)
-h = Dense(20, activation='sigmoid')(h)
+h = Dense(50, activation='sigmoid')(h)
 h = BatchNormalization()(h)
 h = Dropout(0.175)(h)
-h = Dense(10, activation='sigmoid')(h)
+h = Dense(30, activation='sigmoid')(h)
 h = BatchNormalization()(h)
 h = Dropout(0.175)(h)
 
@@ -83,9 +84,7 @@ hx = model.fit(
     validation_data=(valid_X, valid_y),
     epochs=60,
     callbacks=[tensorboard],
-    batch_size= None,
-    steps_per_epoch=10,
-    validation_steps=10)
+    batch_size = 128)
 
 '''
 predictions = list(np.reshape(model.predict(test_features), (len(test_data))))
