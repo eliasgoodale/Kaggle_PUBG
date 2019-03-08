@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from tensorflow.data import Dataset
 from tensorflow.estimator import BoostedTreesRegressor
+from tensorflow.feature_column import numeric_column
 import utils
 
 '''
@@ -27,7 +28,10 @@ before scaling, dtype mem reductions
 
 
 def create_feature_columns(feature_names):
-   return []
+    feature_columns = []
+    for feature in feature_names:
+        feature_columns.append(numeric_column(key=feature, dtype=tf.float16))
+    return []
 
 def prep_data(x, y):
     return (dict({'stats': x}), y)
