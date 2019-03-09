@@ -38,12 +38,11 @@ def build_BoostedTreesRegressor(feature_columns, data_len, batch_size=128):
         'n_trees': 50,
         'max_depth': 13,
         'n_batches_per_layer': 1,
-        'model_dir': f'models/BoostedTrees/{time.time()}',
         'center_bias': True
     }
     return BoostedTreesRegressor(feature_columns, **params)
 
-train = pd.read_csv('../data/train.csv', nrows=200000)
+train = pd.read_csv('../data/train.csv',)
 
 train_X, valid_X, train_y, valid_y = utils.load_data(train, TARGET, DROP_COLS)
 train_X = utils.scale_features(train_X, FEATURE_COLS, utils.tanh_scalar)
@@ -59,15 +58,15 @@ train_input_fn = lambda: input_fn(train_X, train_y, shuffle=True)
 valid_input_fn = lambda: input_fn(valid_X, valid_y)
 
 
-for _ in range(1):
-    estimator.train(train_input_fn, steps=1)
-    results = estimator.evaluate(valid_input_fn, steps=1)
-    print(pd.Series(results).to_frame())
+for _ in range(10):
+    estimator.train(train_input_fn, steps=10)
+    #results = estimator.evaluate(valid_input_fn, steps=1)
+    #print(pd.Series(results).to_frame())
 
 
-test = pd.read_csv('../data/test.csv', nrows=10)
+test = pd.read_csv('../data/test.csv')
 
-pred_labels = test.pop('Id')
+labels = test.pop('Id')
 test_X = utils.scale_features(test[FEATURE_COLS], FEATURE_COLS, utils.tanh_scalar)
 test_X = utils.reduce_mem(test_X)
 
@@ -75,24 +74,16 @@ pred_input_fn = lambda: Dataset.from_tensors(dict(test_X))
 
 pred_dicts = list(estimator.experimental_predict_with_explanations(pred_input_fn))
 
-for pred in pred_dicts:
-    for key, value in pred.items():
-        print(f"{key} => {value}")
+placements = pd.Series([round(p['predictions'][0], 4) for p in pred_dicts])
+
+submission = pd.DataFrame({'Id': labels.values, 'winPlacePerc': placements.values})
+submission.to_csv('submission.csv', index=False)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+#for pred in pred_dicts:
+#    for key, value in pred.items():
+#        print(f"{key} => {value}")
 
 
 #result = estimator.evaluate(valid_input_fn)
