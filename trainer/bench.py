@@ -36,7 +36,7 @@ def input_fn(X, y, batch_size=128, shuffle=False, test=False):
 def build_BoostedTreesRegressor(feature_columns, data_len, batch_size=128):
     params = {
         'n_trees': 50,
-        'max_depth': 13,
+        'max_depth': 3,
         'n_batches_per_layer': 1,
         'center_bias': True
     }
@@ -60,9 +60,6 @@ valid_input_fn = lambda: input_fn(valid_X, valid_y)
 
 for _ in range(10):
     estimator.train(train_input_fn, steps=10)
-    #results = estimator.evaluate(valid_input_fn, steps=1)
-    #print(pd.Series(results).to_frame())
-
 
 test = pd.read_csv('../data/test.csv')
 
@@ -79,22 +76,4 @@ placements = pd.Series([round(p['predictions'][0], 4) for p in pred_dicts])
 submission = pd.DataFrame({'Id': labels.values, 'winPlacePerc': placements.values})
 submission.to_csv('submission.csv', index=False)
 
-
-
-#for pred in pred_dicts:
-#    for key, value in pred.items():
-#        print(f"{key} => {value}")
-
-
-#result = estimator.evaluate(valid_input_fn)
-'''
-for feature_batch, label_batch in ds.take(1):
-  print('Some feature keys:', list(feature_batch.keys()))
-  print()
-  print('A batch of class:', feature_batch['assists'].numpy())
-  print()
-  print('A batch of Labels:', label_batch.numpy())  
-'''
-#for key, value in x.items():
-#     print(f'{key} => {value}')
 

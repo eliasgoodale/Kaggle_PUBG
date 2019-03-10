@@ -10,8 +10,17 @@ from tensorboard_customization import TrainValTensorBoard
 from keras.models import Model
 from keras.layers import Dense, BatchNormalization, Dropout, Input
 from keras.regularizers import L1L2
+import time
 
 '''
+so we are doing PUBG challenge
+I need 4 things to be submited:
+1) EDA
+2) keras API model
+3) estimator API model
+4) boosted trees model
+please don't forget about Tensorboard  screenshots and kaggle submissions
+
 Index([ 'assists', 'boosts', 'damageDealt', 'DBNOs',
        'headshotKills', 'heals', 'killPlace', 'killPoints', 'kills',
        'killStreaks', 'longestKill', 'matchDuration', 'matchType', 'maxPlace',
@@ -47,10 +56,10 @@ feature_cols = [ 'assists', 'boosts', 'damageDealt', 'DBNOs',
 drop_cols = ['Id', 'groupId', 'matchId', 'matchType']
 
 
-SAVE_DIR = 'models/keras'
+SAVE_DIR = f'models/keras/{time.time()}'
 tensorboard = TrainValTensorBoard(log_dir=SAVE_DIR)
 
-train= pd.read_csv('../data/train.csv', nrows=200000)
+train= pd.read_csv('../data/train.csv', nrows=500000)
 
 train_X, valid_X, train_y, valid_y = load_data(train, 'winPlacePerc', drop_cols)
 
@@ -82,15 +91,18 @@ hx = model.fit(
     train_X,
     train_y,
     validation_data=(valid_X, valid_y),
-    epochs=60,
+    epochs=10,
     callbacks=[tensorboard],
     batch_size = 128)
 
-'''
+test = pd.read_csv('../data/test.csv')
+
+ids = test.pop('Id')
+
 predictions = list(np.reshape(model.predict(test_features), (len(test_data))))
-ids = list(np.int32(test_data[:, 0]))
+
 submission = pd.DataFrame(np.transpose(np.array([ids, predictions])))
+
 submission.columns = ['Id', 'winPlacePerc']
-submission['Id'] = np.int32(submission['Id'])
-submission.to_csv('submission.csv', index=False)
-'''
+
+submission.to_csv('keras_submission.csv', index=False)
