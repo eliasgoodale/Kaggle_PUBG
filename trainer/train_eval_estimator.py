@@ -94,6 +94,7 @@ estimator = training(
     name = "./models/DNNestimator/" + datetime.now().strftime("%H_%M")
 )
 
+'''
 testSample = selectedFeature(testData, train = False)
 testSample.isna().sum().loc[testSample.isna().sum() != 0]
 
@@ -113,3 +114,4 @@ output = pd.DataFrame(
 )
 
 output.to_csv("submission.csv", index = False)
+'''
